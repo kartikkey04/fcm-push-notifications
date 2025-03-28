@@ -1,11 +1,12 @@
 const express = require("express");
 require("dotenv").config();
 const notificationRoutes = require("./routes/notificationRoutes");
+const path = require("path");
 
 const app = express();
 
 app.use(express.json());
-app.use(express.static(Path2D.join(__dirname,"../public")));
+app.use(express.static(path.join(__dirname,"../public")));
 app.use("/api", notificationRoutes);
 
 
