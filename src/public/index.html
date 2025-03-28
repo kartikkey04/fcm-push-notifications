@@ -26,12 +26,18 @@
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-        const messaging = firebase.messaging();
+        let messaging;
+
+        try{
+            messaging = firebase.messaging();
+        }catch(error){
+            console.log("Firebase Messaging initialization failed:", error);
+        }
 
         function requestPermission() {
             Notification.requestPermission().then(permission => {
                 if (permission === "granted") {
-                    messaging.getToken({ vapidKey: "your-vapid-key" }).then(token => {
+                    messaging.getToken({ vapidKey: "BMuhIWNptAT4URlvpWrv-catODnmJtRljeRMO-gZ_KtQIcVr1i4nprO4_MtTnJDSHRQ8QGyP1tLVoHft65cpMWM" }).then(token => {
                         console.log("FCM Token:", token);
                         alert("FCM Token copied to console.");
                     }).catch(error => console.error("Error getting FCM token:", error));
@@ -42,10 +48,12 @@
         }
 
         // Handle background messages
-        messaging.onMessage(payload => {
+        if(messaging){
+            messaging.onMessage(payload => {
             console.log("Message received:", payload);
             alert("Push Notification Received!");
         });
+        }
     </script>
 </body>
 
