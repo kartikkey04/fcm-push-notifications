@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FCM Push Notification</title>
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-messaging.js"></script>
+</head>
+
+<body>
+    <h2>FCM Push Notification Test</h2>
+    <button onclick="requestPermission()">Get FCM Token</button>
+    <script>
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAHC1aJ_dwv4VB0OMA7rywWt2M-D7m_piw",
+            authDomain: "fcm-push-notification-77134.firebaseapp.com",
+            projectId: "fcm-push-notification-77134",
+            storageBucket: "fcm-push-notification-77134.firebasestorage.app",
+            messagingSenderId: "216218447590",
+            appId: "1:216218447590:web:2698caf777dff57dbad527",
+            measurementId: "G-6RCR6C72HY"
+        }
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
+
+        function requestPermission() {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    messaging.getToken({ vapidKey: "your-vapid-key" }).then(token => {
+                        console.log("FCM Token:", token);
+                        alert("FCM Token copied to console.");
+                    }).catch(error => console.error("Error getting FCM token:", error));
+                } else {
+                    alert("Permission denied for notifications.");
+                }
+            });
+        }
+
+        // Handle background messages
+        messaging.onMessage(payload => {
+            console.log("Message received:", payload);
+            alert("Push Notification Received!");
+        });
+    </script>
+</body>
+
+</html>
