@@ -12,8 +12,11 @@
 <body>
     <h2>FCM Push Notification Test</h2>
     <button onclick="requestPermission()">Get FCM Token</button>
-    <script>
-        // Firebase config
+    <p id="tokenDisplay" style="word-break: break-all;"></p>
+    <script type="module">
+        
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-messaging.js";
         const firebaseConfig = {
             apiKey: "AIzaSyAHC1aJ_dwv4VB0OMA7rywWt2M-D7m_piw",
             authDomain: "fcm-push-notification-77134.firebaseapp.com",
@@ -25,35 +28,59 @@
         }
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        let messaging;
+        const app = initializeApp(firebaseConfig);
+        const messaging = getMessaging(app);
 
-        try{
-            messaging = firebase.messaging();
-        }catch(error){
-            console.log("Firebase Messaging initialization failed:", error);
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("../firebase-messaging-sw.js")
+                .then((registration) => {
+                    console.log("service worker registered", registration);
+                })
+                .catch((error) => {
+                    console.error("Service worker registration failed:", error);
+                })
+        }
+        else {
+            console.error("Service worker are not supported in this browser");
         }
 
         function requestPermission() {
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    messaging.getToken({ vapidKey: "BMuhIWNptAT4URlvpWrv-catODnmJtRljeRMO-gZ_KtQIcVr1i4nprO4_MtTnJDSHRQ8QGyP1tLVoHft65cpMWM" }).then(token => {
-                        console.log("FCM Token:", token);
-                        alert("FCM Token copied to console.");
-                    }).catch(error => console.error("Error getting FCM token:", error));
-                } else {
-                    alert("Permission denied for notifications.");
+            Notification.requestPermission().then((permission) => {
+
+                if(permission == "granted"){
+                console.log("Notification Permission granted");
+                getFcmToken();
                 }
-            });
+                else{
+                    console.log("Notification permission denied");
+                }
+            })
+        }
+            
+        function getFcmToken() {
+            getToken(messaging, { vapidKey: "BMuhIWNptAT4URlvpWrv-catODnmJtRljeRMO-gZ_KtQIcVr1i4nprO4_MtTnJDSHRQ8QGyP1tLVoHft65cpMWM" })
+                .then((token) => {
+                    if (token) {
+                        console.log("FCM token:", token)
+                        document.getElementById("tokenDisplay").innerText = token;
+                    }
+                    else {
+                        console.log("No FCM token received");
+                    }
+                })
+                .catch((error) => {
+                    console.log("Error getting FCM token:", error);
+                }
+
+                );
         }
 
-        // Handle background messages
-        if(messaging){
-            messaging.onMessage(payload => {
-            console.log("Message received:", payload);
-            alert("Push Notification Received!");
-        });
-        }
+        onMessage(messaging, (payload) => {
+            console.log("Message Received:", payload);
+            alert(`New notification: ${payload.notification.title}`);
+        })
+
+        window.requestPermission = requestPermission
     </script>
 </body>
 
